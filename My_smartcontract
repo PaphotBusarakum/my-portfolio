@@ -1,0 +1,51 @@
+/**
+ *Submitted for verification at Etherscan.io on 2020-12-04
+*/
+
+pragma solidity ^0.5.2;
+
+contract TokenElec {
+    mapping (address => uint256) public balanceOf;
+    mapping (address => uint256) public yourcost;
+    mapping (address => string) public status; 
+    mapping (address => PaymentDetail) public transaction;
+   struct PaymentDetail {
+       address customer;
+       address ownerE;
+       uint value;
+       bool status_payment;
+       } 
+    
+    constructor(uint256 initialSupply) public {
+        balanceOf[msg.sender] = initialSupply;
+    }
+    
+    function setprice(address _customer,uint _cost ) public  {
+    require(msg.sender == 0x5408142593bA953843811B24570397708599558C);
+    yourcost[_customer] = _cost;
+    status[_customer] = "You have to pay :(";
+    }
+    
+    function BuyToken(address _to, uint256 _value) public returns (bool success){
+        balanceOf[_to] +=  _value;
+        return true;
+    }
+    
+    function transfer(address _from, address _to, uint256 _value) public returns (bool success) {
+        require (_value == yourcost[_from]);
+        require(balanceOf[_from] >= _value);                // Check if the sender has enough
+        require(balanceOf[_to] + _value >= balanceOf[_to]); // Check for overflows
+        
+        balanceOf[_from] -= _value;
+        balanceOf[_to] += _value;
+        status[_from] = "You already paid :)";
+        yourcost[_from] = 0;
+        
+        PaymentDetail storage point = transaction[_from];
+        point.customer = _from;
+        point.ownerE = _to;
+        point.value = _value;
+        point.status_payment = true;
+        return true;
+    }
+}
